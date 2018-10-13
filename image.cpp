@@ -15,7 +15,7 @@ void Image::saveNewImage()
     QString imageName;
     imageName = readInput(SAVETITLE, SAVEPROMPT, INPUTERROR);
 
-    if (imageName == NULL)
+    if (imageName == nullptr)
         return;
 
     edited.save(imageName, FORMAT, 100);
@@ -35,7 +35,7 @@ void Image::grayscale()
             pixelValue = edited.pixel(i, j);
 
             int grayValue = 299*pixelValue.red() + 587*pixelValue.green() + 114*pixelValue.blue();
-            grayValue = round((float)grayValue/1000.0);
+            grayValue = static_cast<int>(round(grayValue/1000.0));
             pixelValue.setRed(grayValue);
             pixelValue.setGreen(grayValue);
             pixelValue.setBlue(grayValue);
@@ -52,12 +52,12 @@ void Image::quantization()
     int numShades, w = edited.width(), h = edited.height();
     QString input = readInput(QUANTTITLE, QUANTPROMPT, INPUTERROR);
 
-    if (input == NULL)
+    if (input == nullptr)
         return;
 
     numShades = input.toInt();
-    numShades = clamp(numShades, 1, MAXSHADES);
-    int range = floor(MAXSHADES/(double)numShades);
+    numShades = static_cast<int>(clamp(numShades, 1, MAXSHADES));
+    int range = static_cast<int>(floor(MAXSHADES/numShades));
 
     for (int i = 0; i < w; i++)
     {
@@ -66,11 +66,13 @@ void Image::quantization()
             QColor pixelValue;
             pixelValue = edited.pixel(i, j);
 
-            int grayValue = 0.299*pixelValue.red() + 0.587*pixelValue.green() + 0.114*pixelValue.blue();
+            int grayValue = static_cast<int>(0.299*pixelValue.red())
+                          + static_cast<int>(0.587*pixelValue.green())
+                          + static_cast<int>(0.114*pixelValue.blue());
             // Recalculate pixel value to the middle of the interval it belongs to
-            grayValue = floor((double)grayValue/(double)range)*range + floor(range/2);
+            grayValue = static_cast<int>(floor(static_cast<double>(grayValue)/range)*range + floor(range/2));
 
-            grayValue = clamp(grayValue, 0, 255);
+            grayValue = static_cast<int>(clamp(grayValue, 0, 255));
 
             pixelValue.setRed(grayValue);
             pixelValue.setGreen(grayValue);
@@ -128,7 +130,7 @@ void Image::createHistogram(QString title)
     displayHistogram(histogram, title);
 }
 
-void Image::linearTransformation(int bias, int gain)
+void Image::linearTransformation(double bias, double gain)
 {
     int w = edited.width(), h = edited.height();
 
@@ -140,16 +142,16 @@ void Image::linearTransformation(int bias, int gain)
             int newValue;
             pixelValue = edited.pixel(i, j);
 
-            newValue = gain*pixelValue.red() + bias;
-            newValue = clamp(newValue, 0, 255);
+            newValue = static_cast<int>(gain*pixelValue.red() + bias);
+            newValue = static_cast<int>(clamp(newValue, 0, 255));
             pixelValue.setRed(newValue);
 
-            newValue = gain*pixelValue.green() + bias;
-            newValue = clamp(newValue, 0, 255);
+            newValue = static_cast<int>(gain*pixelValue.green() + bias);
+            newValue = static_cast<int>(clamp(newValue, 0, 255));
             pixelValue.setGreen(newValue);
 
-            newValue = gain*pixelValue.blue() + bias;
-            newValue = clamp(newValue, 0, 255);
+            newValue = static_cast<int>(gain*pixelValue.blue() + bias);
+            newValue = static_cast<int>(clamp(newValue, 0, 255));
             pixelValue.setBlue(newValue);
 
             edited.setPixel(i, j, pixelValue.rgb());
@@ -159,28 +161,28 @@ void Image::linearTransformation(int bias, int gain)
 
 void Image::adjustBrightness()
 {
-    float bias;
+    int bias;
     QString input = readInput(BRIGHTTITLE, BRIGHTPROMPT, INPUTERROR);
 
-    if (input == NULL)
+    if (input == nullptr)
         return;
 
-    bias = input.toFloat();
-    bias = clamp(bias, -255, 255);
+    bias = input.toInt();
+    bias = static_cast<int>(clamp(bias, -255, 255));
 
-    linearTransformation(bias, 1);
+    linearTransformation(static_cast<double>(bias), 1);
     displayLabel->setPixmap(QPixmap::fromImage(edited));
 }
 
 void Image::adjustContrast()
 {
-    float gain;
+    double gain;
     QString input = readInput(CONTTITLE, CONTPROMPT, INPUTERROR);
 
-    if (input == NULL)
+    if (input == nullptr)
         return;
 
-    gain = input.toFloat();
+    gain = input.toDouble();
     gain = clamp(gain, 0.001, 255.0);
 
     linearTransformation(0, gain);
@@ -211,9 +213,9 @@ void Image::grayscaleEqualization()
             QColor pixelValue = edited.pixel(i, j);
             int newValue = cumulative[pixelValue.red()];
 
-            pixelValue.setRed(clamp(newValue, 0.0, 255.0));
-            pixelValue.setGreen(clamp(newValue, 0.0, 255.0));
-            pixelValue.setBlue(clamp(newValue, 0.0, 255.0));
+            pixelValue.setRed(static_cast<int>(clamp(newValue, 0.0, 255.0)));
+            pixelValue.setGreen(static_cast<int>(clamp(newValue, 0.0, 255.0)));
+            pixelValue.setBlue(static_cast<int>(clamp(newValue, 0.0, 255.0)));
 
             edited.setPixel(i, j, pixelValue.rgb());
         }
@@ -241,15 +243,15 @@ void Image::coloredEqualization()
             QColor pixelValue = edited.pixel(i, j);
 
             int newValue = cumulative[pixelValue.red()];
-            newValue = clamp(newValue, 0, 255);
+            newValue = static_cast<int>(clamp(newValue, 0.0, 255.0));
             pixelValue.setRed(newValue);
 
             newValue = cumulative[pixelValue.green()];
-            newValue = clamp(newValue, 0, 255);
+            newValue = static_cast<int>(clamp(newValue, 0.0, 255.0));
             pixelValue.setGreen(newValue);
 
             newValue = cumulative[pixelValue.blue()];
-            newValue = clamp(newValue, 0, 255);
+            newValue = static_cast<int>(clamp(newValue, 0.0, 255.0));
             pixelValue.setBlue(newValue);
 
             equalized.setPixel(i, j, pixelValue.rgb());
@@ -276,7 +278,7 @@ void Image::histogramMatching()
     QString imageName;
     imageName = readInput(LOADTITLE, LOADPROMPT, INPUTERROR);
 
-    if (imageName == NULL)
+    if (imageName == nullptr)
         return;
 
     QImage newImage(imageName);
@@ -327,13 +329,13 @@ void Image::zoomOut()
     QString input = readInput(ZOOMTITLE, ZOOMXPROMPT, INPUTERROR);
     int sx = input.toInt();
 
-    if (input == NULL)
+    if (input == nullptr)
         return;
 
     input = readInput(ZOOMTITLE, ZOOMXPROMPT, INPUTERROR);
     int sy = input.toInt();
 
-    if (input == NULL)
+    if (input == nullptr)
         return;
 
     int w = edited.width(), h = edited.height();
