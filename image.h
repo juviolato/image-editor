@@ -69,7 +69,7 @@ private:
 
     void grayscaleEqualization();
     void coloredEqualization();
-    void linearTransformation(int bias, int gain);
+    void linearTransformation(double bias, double gain);
 
 public:
     bool loadNewImage(QString fileName);
@@ -102,13 +102,13 @@ public:
         isGrayscaled = false;
         displayLabel = new QLabel();
         displayWindow = new QWidget();
-    };
+    }
 
     ~Image()
     {
         displayLabel->~QLabel();
         displayWindow->~QWidget();
-    };
+    }
 };
 
 #endif // IMAGE
