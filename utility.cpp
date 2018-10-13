@@ -2,25 +2,25 @@
 
 QString readInput(QString inputBoxTitle, QString inputBoxPrompt, QString readErrorMessage)
 {
-    QInputDialog *popup = new QInputDialog(NULL, NULL);     // Create popup window
+    QInputDialog *popup = new QInputDialog(nullptr, nullptr);     // Create popup window
     QString fileName;
     bool read;
 
     do
     {
-        fileName = popup->getText(NULL, inputBoxTitle, inputBoxPrompt, QLineEdit::Normal, "", &read);       // Read user input from window
+        fileName = popup->getText(nullptr, inputBoxTitle, inputBoxPrompt, QLineEdit::Normal, "", &read);       // Read user input from window
 
         if (read && fileName.isEmpty())
-            QMessageBox::information(0, "ERROR", readErrorMessage);
+            QMessageBox::information(nullptr, "ERROR", readErrorMessage);
     } while (read && fileName.isEmpty());
 
     if (read)
         return fileName;
     else
-        return NULL;
+        return nullptr;
 }
 
-float clamp(float value, float min, float max)
+double clamp(double value, double min, double max)
 {
     if (value < min)
         return min;
@@ -33,11 +33,11 @@ float clamp(float value, float min, float max)
 int findClosestPositionInArray(int value, int array[], int size)
 {
     int difference = INT_MAX;
-    int position;
+    int position{0};
 
     for (int i = 0; i < size; i++)
     {
-        int currDiff = fabs(array[i] - value);
+        int currDiff = abs(array[i] - value);
         if (currDiff <= difference && array[i] > 0)
         {
             difference = currDiff;
@@ -79,9 +79,9 @@ QImage convolution(QImage& image, const double kernel[KERNELSIZE][KERNELSIZE], i
                 {
                     pixelValue = image.pixel(i+n-1, j+m-1);
 
-                    newRed += round(rotatedKernel[m][n] * (double)pixelValue.red());
-                    newGreen += round(rotatedKernel[m][n] * (double)pixelValue.green());
-                    newBlue += round(rotatedKernel[m][n] * (double)pixelValue.blue());
+                    newRed += round(rotatedKernel[m][n] * static_cast<double>(pixelValue.red()));
+                    newGreen += round(rotatedKernel[m][n] * static_cast<double>(pixelValue.green()));
+                    newBlue += round(rotatedKernel[m][n] * static_cast<double>(pixelValue.blue()));
                 }
             }
 
@@ -92,9 +92,9 @@ QImage convolution(QImage& image, const double kernel[KERNELSIZE][KERNELSIZE], i
                 newBlue += 127;
             }
 
-            newValue.setRed(clamp(newRed, 0, 255));
-            newValue.setGreen(clamp(newGreen, 0, 255));
-            newValue.setBlue(clamp(newBlue, 0, 255));
+            newValue.setRed(static_cast<int>(clamp(newRed, 0, 255)));
+            newValue.setGreen(static_cast<int>(clamp(newGreen, 0, 255)));
+            newValue.setBlue(static_cast<int>(clamp(newBlue, 0, 255)));
             filtered.setPixel(i, j, newValue.rgb());
         }
     }
@@ -120,7 +120,9 @@ void calculateHistogram(QImage image, int histogram[MAXSHADES], bool isGrayscale
 
             // Uses the image in grayscale
             if (!isGrayscaled)
-                grayValue = 0.299*pixelValue.red() + 0.587*pixelValue.green() + 0.114*pixelValue.blue();    // Grayscales only if it isn't already
+                grayValue = static_cast<int>(0.299*pixelValue.red())
+                          + static_cast<int>(0.587*pixelValue.green())
+                          + static_cast<int>(0.114*pixelValue.blue());    // Grayscales only if it isn't already
             else
                 grayValue = pixelValue.red();
             histogram[grayValue] += 1;
@@ -132,9 +134,9 @@ void calcCumulativeHistogram(int numPixels, int histogram[MAXSHADES], int cumula
 {
     double alpha = 255.0/numPixels;
 
-    cumulative[0] = round(alpha*(float)histogram[0]);
+    cumulative[0] = static_cast<int>(round(alpha*(histogram[0])));
     for (int i = 1; i < MAXSHADES; i++)
-        cumulative[i] = cumulative[i-1] + round(alpha*(float)histogram[i]);
+        cumulative[i] = cumulative[i-1] + static_cast<int>(round(alpha*histogram[i]));
 }
 
 void displayHistogram(int histogram[MAXSHADES], QString title)
@@ -145,7 +147,7 @@ void displayHistogram(int histogram[MAXSHADES], QString title)
     double alpha = 255.0/numPixels;
 
     for (int i = 0; i < MAXSHADES; i++)
-       histogram[i] = round(alpha*histogram[i]);
+       histogram[i] = static_cast<int>(round(alpha*histogram[i]));
 
     for (int i = 0; i < MAXSHADES; i++)
     {
