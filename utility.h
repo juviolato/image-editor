@@ -14,7 +14,7 @@
 
 QString readInput(QString inputBoxTitle, QString inputBoxPrompt, QString readErrorMessage);
 
-float clamp(float value, float min, float max);
+double clamp(double value, double min, double max);
 
 int findClosestPositionInArray(int value, int array[], int size);
 
