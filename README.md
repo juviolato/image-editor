@@ -15,3 +15,6 @@ So far offers:
 	Zooming out (by user-chosen factors) and zooming in (2x2).
 	Image rotation (90 degrees, clockwise and counterclockwise)
 	Filters: Gaussian 3x3, Laplacian, generic High Pass, horizontal and vertical Prewitt, horizontal and vertical Sobel.
+
+Build instructions for Qt Creator IDE:
+File > Open File or Project... > editor.pro > Build
